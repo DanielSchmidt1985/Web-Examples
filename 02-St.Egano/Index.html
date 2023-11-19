@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Bild per Drag-and-Drop einfügen</title>
+    <style>
+        #dropArea {
+            width: 100px;
+            height: 100px;
+            border: 2px dashed #ccc;
+            text-align: center;
+            line-height: 300px;
+            margin: 20px auto;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="dropArea" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);"></div>
+    <img id="imagePreview" style="display: none;">
+    <div id="pixelValues"></div>
+
+    <script>
+        function dragOverHandler(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "copy";
+        }
+
+        function dropHandler(event) {
+            event.preventDefault();
+
+            if (event.dataTransfer.items) {
+                // Use DataTransferItemList interface to access the file(s)
+                for (var i = 0; i < event.dataTransfer.items.length; i++) {
+                    // If dropped items aren't files, reject them
+                    if (event.dataTransfer.items[i].kind === 'file') {
+                        var file = event.dataTransfer.items[i].getAsFile();
+                        previewImage(file);
+                        readImage(file);
+                    }
+                }
+            } else {
+                // Use DataTransfer interface to access the file(s)
+                for (var i = 0; i < event.dataTransfer.files.length; i++) {
+                    previewImage(event.dataTransfer.files[i]);
+                    readImage(event.dataTransfer.files[i]);
+                }
+            }
+        }
+
+        function previewImage(file) {
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                var img = document.getElementById('imagePreview');
+                img.src = event.target.result;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function readImage(file) {
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                var img = new Image();
+                img.onload = function () {
+                    var canvas = document.createElement('canvas');
+                    var ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    Entschlüsseln(img, ctx);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function Entschlüsseln(img, ctx) {
+
+
+            var txt = "";
+            var x = 0; 
+            var y = 0;
+            
+            while (true) {
+                var p = ctx.getImageData(x, y, 1, 1).data; // RGBA values of the pixel
+                txt += String.fromCharCode(p[0]);
+                
+                x = x + p[1];
+                while (x >= img.width) {
+                    x -= img.width;
+                }
+                y = y + p[2];
+                while (y >= img.height) {
+                    y -= img.height;
+                }
+            
+                if ((p[1] == 0 && p[2] == 0)) {
+                    break;
+                }
+
+            }
+
+            var pixelValues = document.getElementById('pixelValues');
+            pixelValues.innerHTML = ''; // Clear previous values
+            pixelValues.innerHTML = txt;
+        }
+
+    </script>
+
+</body>
+
+</html>
