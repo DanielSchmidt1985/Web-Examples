@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Wundertüten für Maras Kindergarten</title>
+  <script>
+    function packGifts() {
+      const numDiceGames = parseInt(document.getElementById('numDiceGames').value);
+      const numCardGames = parseInt(document.getElementById('numCardGames').value);
+      const numSkillGames = parseInt(document.getElementById('numSkillGames').value);
+      const numGiftBags = parseInt(document.getElementById('numGiftBags').value);
+
+      const totalGames = numDiceGames + numCardGames + numSkillGames;
+
+      const gamesPerBag = Math.floor(totalGames / numGiftBags); // Spiele pro Tüte abgerundet
+
+      const remainingDice = numDiceGames - gamesPerBag * numGiftBags;
+      const remainingCards = numCardGames - gamesPerBag * numGiftBags;
+      const remainingSkills = numSkillGames - gamesPerBag * numGiftBags;
+
+      let result = 'Zusammenstellung der Wundertüten:\n';
+      for (let i = 0; i < numGiftBags; i++) {
+        let diceInBag = gamesPerBag;
+        let cardsInBag = gamesPerBag;
+        let skillsInBag = gamesPerBag;
+
+        // Falls Spiele übrig sind, füge sie den Tüten hinzu
+        if (remainingDice > 0) {
+          diceInBag++;
+          remainingDice--;
+        }
+        if (remainingCards > 0) {
+          cardsInBag++;
+          remainingCards--;
+        }
+        if (remainingSkills > 0) {
+          skillsInBag++;
+          remainingSkills--;
+        }
+
+        result += `Tüte ${i + 1}: ${diceInBag} Würfelspiele, ${cardsInBag} Kartenspiele, ${skillsInBag} Geschicklichkeitsspiele\n`;
+      }
+
+      alert(result);
+    }
+  </script>
+</head>
+<body>
+  <h1>Wundertüten für Maras Kindergarten</h1>
+  <form onsubmit="event.preventDefault(); packGifts();">
+    Anzahl der Würfelspiele: <input type="number" id="numDiceGames" required><br>
+    Anzahl der Kartenspiele: <input type="number" id="numCardGames" required><br>
+    Anzahl der Geschicklichkeitsspiele: <input type="number" id="numSkillGames" required><br>
+    Anzahl der Wundertüten: <input type="number" id="numGiftBags" required><br>
+    <button type="submit">Wundertüten packen</button>
+  </form>
+</body>
+</html>

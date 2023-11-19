@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf8">
+    <title>Wundertüten für Maras Kindergarten</title>
+
+    <style>
+        td {
+            vertical-align: top;
+            height: 30px;
+            text-align: right;
+        }
+
+        tr:nth-child(-n+2) td {
+            border: 1px solid #ccc;
+        }
+
+        table tr {
+            height: 30px;
+        }
+
+        table {
+            vertical-align: top;
+        }
+
+        #imageCell {
+            vertical-align: top;
+            height: 300px;
+        }
+
+        input {
+            margin: 3px;
+            text-align: left;
+        }
+
+        label {
+            margin: 10px;
+            /* display:grid; */
+        }
+
+    </style>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td>
+                <table id="myTable">
+                    <tr>
+                        <td id="imageCell" rowspan="30">
+                            <img src="PIC1.png" alt="Beschreibung des Bildes">
+                        </td>
+                        <td>
+                            <label for="txt1">Anzahl Wundertüten:</label>
+                        </td>
+                        <td>
+                            <input type="text" id="txt1" onchange="SpielesortenAnlegen()">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="txt2">Anzahl Spielesorten:</label>
+                        </td>
+                        <td>
+                            <input type="text" id="txt2" onchange="SpielesortenAnlegen()">
+                        </td>
+                    </tr>
+                    <tr>
+                        <!-- <td>
+                            <label>Spiele Gesamt:</label>
+                        </td>
+                        <td>
+                            <label class="left" id="lblSpiele">0</label>
+                        </td> -->
+                    </tr>
+                </table>
+            </td>
+            <td id="divRes">
+
+            </td>
+        </tr>
+    </table>
+
+    <script>
+        var start = 3;
+        var maxSpielesorten = 28;
+
+        // Methode zum Generieren von Zeilen
+        function CreateRows() {
+            var table = document.getElementById("myTable");
+
+            for (var i = 0; i < maxSpielesorten; i++) { // 29, da eine Zeile bereits vorhanden ist
+                var newRow = table.insertRow();
+                var newCell = newRow.insertCell()
+                newCell = newRow.insertCell()
+            }
+        }
+
+        function SpielesortenAnlegen() {
+            hideElements();
+
+            var table = document.getElementById("myTable");
+            var Wundertüten = document.getElementById('txt1').value;
+            var Spielesorten = document.getElementById('txt2').value;
+
+            let Spiele = 0;
+
+            for (var i = 0; i < Spielesorten; i++) {
+                var cell = table.rows[i + start].cells[0];
+                var label = document.getElementById("labelS" + i);
+                if (label == null) {
+                    var label = document.createElement("label");
+                    label.id = "labelS" + i;
+                    label.htmlFor = "txtS" + (i);
+                    label.textContent = "Anzahl Spielesorte " + (i + 1) + ": ";
+                    cell.appendChild(label);
+                }
+                cell.style.visibility = "visible";
+
+                cell = table.rows[i + start].cells[1];
+                var input = document.getElementById("txtS" + i);
+                if (input == null) {
+                    input = document.createElement("input");
+                    input.type = "text";
+                    input.id = "txtS" + (i);
+                    input.onchange = Lösen;
+                    cell.appendChild(input);
+                }
+                // Erzeuge eine Random Anzahl zwischen Anzahl Wundertüten - 1 und Anzahl Wundertüten * 3
+                input.value = Math.floor(Math.random() * (Wundertüten * 3 - Wundertüten)) + (Wundertüten * 1) - 1.0;
+                cell.style.visibility = "visible";
+
+                // Spiele += input.value * 1.0;
+
+            }
+            
+            // document.getElementById("lblSpiele").innerText = Spiele;
+
+            Lösen();
+        }
+
+        // Bereits erstellte Zellen ausblenden (benötigt, falls Anzahl der Spielesorten reduziert wird)
+        function hideElements() {
+            var table = document.querySelector('table');
+            var rows = table.rows;
+            for (var i = start; i < rows.length; i++) {
+                var cells = rows[i].cells;
+                for (var n = 0; n < 3; n++) {
+                    if (cells.length > n) {
+                        cells[n].style.visibility = "hidden";
+                    }
+                }
+            }
+        }
+
+        // Alles auf die Wundertüten aufteilen
+        function Lösen() {
+
+            var numTüten = document.getElementById('txt1').value;
+            var numSpielesorten = document.getElementById('txt2').value;
+
+            var Tüten = [];
+
+            // Matrix [Tüten x Spielesorten] als 2 dimensionales Array mit 0 initialisieren  
+            for (let i = 0; i < numTüten; i++) {
+                Tüten.push([])
+                for (let n = 0; n < numSpielesorten; n++) {
+                    Tüten[i].push(0);
+                }
+            }
+
+            // Verteilungs-Algorytmus 
+            for (let i = 0; i < numSpielesorten; i++) {
+                var Spiele = document.getElementById("txtS" + i).value * 1.0;
+                for (let n = 0; n < Spiele; n++) {
+                    //
+                    // Über die Spiele iterieren und diese jeweils in die Tüte mit den 
+                    // wenigsten enthaltenen Spielen packen
+                    //
+                    var gewählteTüte = 0;
+                    var minSpiele = Number.MAX_VALUE;
+                    for (let t = 0; t < numTüten; t++) {
+                        var sum = Tüten[t].reduce((acc, curr) => acc + curr, 0);
+                        if (sum < minSpiele) {
+                            gewählteTüte = t;
+                            minSpiele = sum;
+                        }
+                    }
+                    Tüten[gewählteTüte][i]++;
+                }
+            }
+
+            //
+            // UI: Ergebnisse in Tabelle Ausgeben
+            // 
+
+            var tabRes = document.getElementById('tabResults');
+            if (tabRes != null) {
+                tabRes.remove();
+            }
+
+            tabRes = document.createElement("table");
+            tabRes.id = "tabResults"
+            tabRes.style.paddingTop = "71px";
+
+            for (var i = 0; i < maxSpielesorten + start; i++) {
+                var row = tabRes.insertRow();
+            }
+
+            document.getElementById("divRes").appendChild(tabRes);
+            for (var i = 0; i < numTüten; i++) {
+                var cell = tabRes.rows[0].insertCell();
+                var label = document.createElement("label");
+                label.textContent = "Wundertüte " + (i + 1);
+                cell.appendChild(label);
+                for (var n = 0; n < numSpielesorten; n++) {
+                    cell = tabRes.rows[n + 1].insertCell();
+                    label = document.createElement("label");
+                    label.textContent = Tüten[i][n];
+                    cell.appendChild(label);
+                }
+                cell = tabRes.rows[numSpielesorten * 1.0 + 1].insertCell();
+                label = document.createElement("label");
+                label.textContent = Tüten[i].reduce((acc, curr) => acc + curr, 0);
+                label.style.fontWeight = 'bold';
+                cell.appendChild(label);
+            }
+
+        }
+
+        // Aufrufen der Methode beim Laden der Seite
+        window.onload = function () {
+            // Leere Zeilen anlegen
+            CreateRows();
+
+            // Random Anzahl Wundertüten und Spielesorten festlegen
+            var txt = document.getElementById('txt1');
+            txt.value = Math.floor(Math.random() * (7) + 1) + 1;
+            txt = document.getElementById('txt2');
+            txt.value = Math.floor(Math.random() * (23) + 1);
+
+            SpielesortenAnlegen();
+        };
+    </script>
+</body>
+
+</html>

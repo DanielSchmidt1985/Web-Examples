@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf8">
+    <title>example</title>
+
+    <style>
+        #meinButton {
+            position: relative;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Hello World</h1>
+    <button id="meinButton" onclick="verschiebeButton()">Move</button>
+    <script>
+        function verschiebeButton() {
+            var button = document.getElementById("meinButton");
+            var aktuellePosition = parseFloat(window.getComputedStyle(button).left);
+            button.style.left = (aktuellePosition + 1) + "px";
+        }
+
+    </script>
+</body>
+
+</html>
